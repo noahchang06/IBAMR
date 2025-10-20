@@ -1,0 +1,51 @@
+
+======================================================================
+                    AORTIC VALVE SIMULATION REPORT
+======================================================================
+
+Patient Condition: SEVERE
+
+HEMODYNAMIC MEASUREMENTS:
+----------------------------------------------------------------------
+Peak Jet Velocity:                       150.0 cm/s
+Mean Pressure Gradient:                   25.0 mmHg
+Peak Pressure Gradient:                   40.0 mmHg
+Effective Orifice Area:                    1.2 cm²
+
+STRUCTURAL PARAMETERS:
+----------------------------------------------------------------------
+Leaflet Mobility:                          0.7
+Calcification Index:                  Moderate
+
+FLOW CHARACTERISTICS:
+----------------------------------------------------------------------
+Cardiac Output:                            5.0 L/min
+Regurgitant Volume:                        5.0 mL
+Peak Wall Shear Stress:                   80.0 dyne/cm²
+
+CLINICAL INTERPRETATION:
+----------------------------------------------------------------------
+Based on ACC/AHA Guidelines for Valvular Heart Disease:
+
+
+Severity: SEVERE AORTIC STENOSIS
+Recommendation: AORTIC VALVE REPLACEMENT INDICATED
+  - Symptomatic patients: Class I recommendation (immediate intervention)
+  - Asymptomatic with EF <50%: Class I recommendation
+  - Consider TAVR vs. surgical AVR based on risk assessment
+
+Risk Factors:
+  - High transvalvular pressure gradient (>40 mmHg)
+  - Significantly reduced orifice area (<1.0 cm²)
+  - Risk of sudden cardiac death if untreated
+
+======================================================================
+Report Generated: [Simulation Date]
+Simulation Method: Immersed Boundary Method (IBAMR)
+Model: 2D Aortic Valve FSI Simulation
+======================================================================
+
+DISCLAIMER: This simulation is for educational and research purposes.
+Clinical decisions should be based on comprehensive patient evaluation
+including physical examination, medical imaging, and laboratory studies.
+======================================================================

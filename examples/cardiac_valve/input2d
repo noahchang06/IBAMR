@@ -1,0 +1,205 @@
+// Physical parameters for aortic valve simulation
+// Based on physiological values for human aortic valve
+
+// Fluid properties (blood)
+RHO = 1.06                                   // blood density (g/cm^3)
+MU = 0.035                                   // blood viscosity (Poise) = 0.0035 Pa·s
+CHARACTERISTIC_VELOCITY = 100.0              // peak aortic velocity (cm/s) during systole
+CHARACTERISTIC_LENGTH = 2.0                  // valve diameter (cm)
+Re = RHO*CHARACTERISTIC_VELOCITY*CHARACTERISTIC_LENGTH/MU  // Reynolds number ~ 6000
+
+// Grid spacing parameters
+L = 12.0                                     // computational domain width (cm)
+MAX_LEVELS = 5                               // maximum number of AMR levels
+REF_RATIO = 2                                // refinement ratio between levels
+N = 32                                       // grid cells on coarsest level
+NFINEST = (REF_RATIO^(MAX_LEVELS - 1))*N     // effective grid cells on finest level
+DX0 = L/N                                    // mesh width on coarsest level
+DX = L/NFINEST                               // mesh width on finest level
+MFAC = 2.0                                   // ratio of Lagrangian to Cartesian mesh width
+
+// Solver parameters
+IB_DELTA_FUNCTION = "IB_4"                   // smoothed delta function (4-point stencil)
+SOLVER_TYPE = "STAGGERED"                    // staggered grid fluid solver
+CFL_MAX = 0.3                                // CFL number
+DT_MAX = 0.001                               // maximum timestep (seconds)
+START_TIME = 0.0                             // simulation start time
+CARDIAC_CYCLE = 0.8                          // cardiac cycle period (seconds) - 75 bpm
+NUM_CYCLES = 2                               // number of cardiac cycles to simulate
+END_TIME = NUM_CYCLES*CARDIAC_CYCLE          // final simulation time
+GROW_DT = 2.0                                // timestep growth factor
+CONVECTIVE_TS_TYPE = "ADAMS_BASHFORTH"       // time stepping for convective terms
+CONVECTIVE_OP_TYPE = "PPM"                   // piecewise parabolic method
+CONVECTIVE_FORM = "ADVECTIVE"                // advective form of convective terms
+NORMALIZE_PRESSURE = TRUE                    // normalize pressure to have zero mean
+ERROR_ON_DT_CHANGE = FALSE                   // allow timestep changes
+VORTICITY_TAGGING = TRUE                     // use vorticity-based AMR
+TAG_BUFFER = 2                               // AMR tag buffer size
+REGRID_CFL_INTERVAL = 0.3                    // regrid when material moves 0.3 meshwidths
+OUTPUT_U = TRUE                              // output velocity
+OUTPUT_P = TRUE                              // output pressure
+OUTPUT_F = TRUE                              // output force density
+OUTPUT_OMEGA = TRUE                          // output vorticity
+OUTPUT_DIV_U = TRUE                          // output velocity divergence
+ENABLE_LOGGING = TRUE
+
+// Valve material parameters (will be read from .spring and .beam files)
+// These are penalty parameters for constrained points (valve annulus attachment)
+KAPPA_S_STRUCTURE = 1.0e8                    // penalty spring stiffness
+ETA_S_STRUCTURE = 0.0                        // penalty damping
+
+// Pulsatile flow parameters (physiological aortic flow waveform)
+// Boundary conditions simulate the left ventricle ejecting blood through valve
+SYSTOLE_DURATION = 0.3*CARDIAC_CYCLE         // systolic ejection time
+PEAK_VELOCITY = 100.0                        // peak velocity during systole (cm/s)
+DIASTOLE_VELOCITY = 5.0                      // small backflow during diastole (cm/s)
+
+VelocityBcCoefs_0 {
+   // Inflow boundary (left side - ventricular side)
+   // Pulsatile waveform: systole (0.3s) + diastole (0.5s)
+   t_systole = SYSTOLE_DURATION
+   t_cycle = CARDIAC_CYCLE
+   v_peak = PEAK_VELOCITY
+   v_dias = -DIASTOLE_VELOCITY
+
+   acoef_function_0 = "0.0"                  // X_LO: inflow (Neumann)
+   acoef_function_1 = "1.0"                  // X_HI: outflow (Dirichlet)
+   acoef_function_2 = "1.0"                  // Y_LO: wall (Dirichlet)
+   acoef_function_3 = "1.0"                  // Y_HI: wall (Dirichlet)
+
+   bcoef_function_0 = "1.0"                  // X_LO
+   bcoef_function_1 = "0.0"                  // X_HI
+   bcoef_function_2 = "0.0"                  // Y_LO
+   bcoef_function_3 = "0.0"                  // Y_HI
+
+   // Pulsatile flow: sinusoidal during systole, small backflow during diastole
+   // Formula: during systole (t_mod < t_systole): v = v_peak * sin(pi*t_mod/t_systole)
+   //          during diastole: v = v_dias
+   gcoef_function_0 = "((fmod(t,t_cycle)<t_systole) ? v_peak*sin(3.14159265*fmod(t,t_cycle)/t_systole) : v_dias)"
+   gcoef_function_1 = "0.0"
+   gcoef_function_2 = "0.0"
+   gcoef_function_3 = "0.0"
+}
+
+VelocityBcCoefs_1 {
+   // Y-velocity boundary conditions
+   acoef_function_0 = "1.0"                  // X_LO
+   acoef_function_1 = "1.0"                  // X_HI
+   acoef_function_2 = "1.0"                  // Y_LO
+   acoef_function_3 = "1.0"                  // Y_HI
+
+   bcoef_function_0 = "0.0"
+   bcoef_function_1 = "0.0"
+   bcoef_function_2 = "0.0"
+   bcoef_function_3 = "0.0"
+
+   gcoef_function_0 = "0.0"
+   gcoef_function_1 = "0.0"
+   gcoef_function_2 = "0.0"
+   gcoef_function_3 = "0.0"
+}
+
+IBHierarchyIntegrator {
+   start_time = START_TIME
+   end_time = END_TIME
+   grow_dt = GROW_DT
+   regrid_cfl_interval = REGRID_CFL_INTERVAL
+   dt_max = DT_MAX
+   error_on_dt_change = ERROR_ON_DT_CHANGE
+   enable_logging = ENABLE_LOGGING
+}
+
+IBMethod {
+   IB_delta_fcn = IB_DELTA_FUNCTION
+   enable_logging = ENABLE_LOGGING
+}
+
+INSStaggeredHierarchyIntegrator {
+   mu = MU
+   rho = RHO
+   start_time = START_TIME
+   end_time = END_TIME
+   grow_dt = GROW_DT
+   convective_time_stepping_type = CONVECTIVE_TS_TYPE
+   convective_op_type = CONVECTIVE_OP_TYPE
+   convective_difference_form = CONVECTIVE_FORM
+   normalize_pressure = NORMALIZE_PRESSURE
+   cfl = CFL_MAX
+   dt_max = DT_MAX
+   using_vorticity_tagging = VORTICITY_TAGGING
+   vorticity_abs_thresh = 0.25, 0.5, 1.0, 2.0, 4.0
+   tag_buffer = TAG_BUFFER
+   output_U = OUTPUT_U
+   output_P = OUTPUT_P
+   output_F = OUTPUT_F
+   output_Omega = OUTPUT_OMEGA
+   output_Div_U = OUTPUT_DIV_U
+   enable_logging = ENABLE_LOGGING
+}
+
+Main {
+   solver_type = SOLVER_TYPE
+
+   // Log file parameters
+   log_file_name = "valve2d.log"
+   log_all_nodes = FALSE
+
+   // Visualization dump parameters
+   viz_writer = "VisIt"
+   viz_dump_interval = 50                    // output every 50 timesteps
+   viz_dump_dirname = "viz_valve2d"
+   visit_number_procs_per_file = 1
+
+   // Restart dump parameters
+   restart_dump_interval = 500
+   restart_dump_dirname = "restart_valve2d"
+
+   // Hierarchy data dump parameters
+   data_dump_interval = 0
+   data_dump_dirname = "hier_data_valve2d"
+
+   // Timer dump parameters
+   timer_dump_interval = 0
+}
+
+CartesianGeometry {
+   domain_boxes = [ (0,0), (4*N - 1, 2*N - 1) ]
+   x_lo = -6.0, -6.0                         // domain lower corner (valve centered at origin)
+   x_up =  6.0,  6.0                         // domain upper corner
+   periodic_dimension = 0, 0                 // no periodic boundaries
+}
+
+GriddingAlgorithm {
+   max_levels = MAX_LEVELS
+   ratio_to_coarser {
+      level_1 = REF_RATIO, REF_RATIO
+      level_2 = REF_RATIO, REF_RATIO
+      level_3 = REF_RATIO, REF_RATIO
+      level_4 = REF_RATIO, REF_RATIO
+      level_5 = REF_RATIO, REF_RATIO
+   }
+   largest_patch_size {
+      level_0 = 512, 512
+   }
+   smallest_patch_size {
+      level_0 = 8, 8
+   }
+   efficiency_tolerance = 0.85e0
+   combine_efficiency = 0.85e0
+}
+
+StandardTagAndInitialize {
+   tagging_method = "GRADIENT_DETECTOR"
+}
+
+LoadBalancer {
+   bin_pack_method = "SPATIAL"
+   max_workload_factor = 1
+}
+
+TimerManager {
+   print_exclusive = FALSE
+   print_total = TRUE
+   print_threshold = 0.1
+   timer_list = "IBAMR::*::*", "IBTK::*::*", "*::*::*"
+}
