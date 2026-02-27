@@ -16,6 +16,9 @@ compile_flags.txt
 .clangd
 .clang-tidy
 scripts/formatting/programs
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 # Created by https://www.gitignore.io/api/linux,osx,c,c++,fortran
 
