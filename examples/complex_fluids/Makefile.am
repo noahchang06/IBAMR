@@ -13,7 +13,10 @@
 
 ## Process this file with automake to produce Makefile.in
 include $(top_srcdir)/config/Make-rules
-SUBDIRS = ex0 ex1 ex2 ex3 ex4
+SUBDIRS = ex0 ex1 ex3
+if LIBMESH_ENABLED
+SUBDIRS += ex2 ex4
+endif
 
 COMPLETE_EXAMPLES = $(SUBDIRS)
 INCOMPLETE_EXAMPLES =

@@ -87,6 +87,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@LIBMESH_ENABLED_TRUE@am__append_1 = ex2 ex4
 subdir = examples/complex_fluids
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/add_rpath.m4 \
@@ -172,7 +173,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = ex0 ex1 ex3 ex2 ex4
 am__DIST_COMMON = $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/Make-rules
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -459,7 +460,7 @@ IBAMR2d_LIBS = ${top_builddir}/lib/libIBAMR2d.a ${top_builddir}/ibtk/lib/libIBTK
 IBAMR3d_LIBS = ${top_builddir}/lib/libIBAMR3d.a ${top_builddir}/ibtk/lib/libIBTK3d.a
 pkg_includedir = $(includedir)/@PACKAGE@
 SUFFIXES = .f.m4
-SUBDIRS = ex0 ex1 ex2 ex3 ex4
+SUBDIRS = ex0 ex1 ex3 $(am__append_1)
 COMPLETE_EXAMPLES = $(SUBDIRS)
 INCOMPLETE_EXAMPLES = 
 all: all-recursive
